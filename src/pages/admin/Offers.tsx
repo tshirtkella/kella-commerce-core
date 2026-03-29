@@ -131,7 +131,7 @@ const Offers = () => {
 
   const toggleMutation = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase.from("offers").update({ is_active }).eq("id", id);
+      const { error } = await (supabase as any).from("offers").update({ is_active }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["offers"] }),
