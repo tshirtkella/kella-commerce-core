@@ -21,6 +21,7 @@ const PIE_COLORS = [
 ];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
