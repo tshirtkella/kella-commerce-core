@@ -14,7 +14,7 @@ const navItems = [
 ];
 
 const AdminLayout = () => {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, isAdmin, signOut } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -26,6 +26,7 @@ const AdminLayout = () => {
   }
 
   if (!user) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/" replace />;
 
   return (
     <div className="flex min-h-screen">
