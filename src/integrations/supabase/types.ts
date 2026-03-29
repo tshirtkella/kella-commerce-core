@@ -148,6 +148,66 @@ export type Database = {
           },
         ]
       }
+      offers: {
+        Row: {
+          badge_label: string | null
+          bg_color: string | null
+          created_at: string
+          cta_link: string | null
+          cta_text: string | null
+          description: string | null
+          discount_text: string
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          placement: string
+          priority: number
+          starts_at: string | null
+          subtitle: string | null
+          text_color: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          badge_label?: string | null
+          bg_color?: string | null
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
+          description?: string | null
+          discount_text: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          placement?: string
+          priority?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          text_color?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          badge_label?: string | null
+          bg_color?: string | null
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
+          description?: string | null
+          discount_text?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          placement?: string
+          priority?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          text_color?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
