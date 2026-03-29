@@ -23,7 +23,7 @@ export const useOffers = (placement?: string) => {
   return useQuery({
     queryKey: ["public-offers", placement],
     queryFn: async () => {
-      let query = supabase
+      let query = (supabase as any)
         .from("offers")
         .select("*")
         .eq("is_active", true)
