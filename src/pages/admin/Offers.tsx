@@ -105,7 +105,7 @@ const Offers = () => {
         const { error } = await (supabase as any).from("offers").update(record).eq("id", payload.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("offers").insert(record);
+        const { error } = await (supabase as any).from("offers").insert(record);
         if (error) throw error;
       }
     },
