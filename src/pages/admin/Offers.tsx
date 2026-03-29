@@ -74,7 +74,7 @@ const Offers = () => {
   const { data: offers = [], isLoading } = useQuery({
     queryKey: ["offers"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("offers")
         .select("*")
         .order("priority", { ascending: false });
@@ -102,10 +102,10 @@ const Offers = () => {
         ends_at: payload.ends_at || null,
       };
       if (payload.id) {
-        const { error } = await supabase.from("offers").update(record).eq("id", payload.id);
+        const { error } = await (supabase as any).from("offers").update(record).eq("id", payload.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("offers").insert(record);
+        const { error } = await (supabase as any).from("offers").insert(record);
         if (error) throw error;
       }
     },
@@ -119,7 +119,7 @@ const Offers = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("offers").delete().eq("id", id);
+      const { error } = await (supabase as any).from("offers").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -131,7 +131,7 @@ const Offers = () => {
 
   const toggleMutation = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase.from("offers").update({ is_active }).eq("id", id);
+      const { error } = await (supabase as any).from("offers").update({ is_active }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["offers"] }),
