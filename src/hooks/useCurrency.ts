@@ -23,7 +23,7 @@ export const useCurrency = () => {
   const { data: currencyCode = "BDT" } = useQuery({
     queryKey: ["store-currency"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("store_settings")
         .select("value")
         .eq("key", "currency")
