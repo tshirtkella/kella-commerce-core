@@ -335,7 +335,9 @@ const Dashboard = () => {
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg">Order Activity</CardTitle>
-            <Badge variant="outline" className="text-xs font-normal">Recent</Badge>
+            <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate("/admin/orders")}>
+              View All <ArrowUpRight className="h-3 w-3 ml-1" />
+            </Button>
           </CardHeader>
           <CardContent>
             {!recentOrders?.length ? (
