@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,9 +51,97 @@ const Settings = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<AppRole>("user");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [stripeKey, setStripeKey] = useState("");
-  const [stripeEnabled, setStripeEnabled] = useState(false);
-  const [savingStripe, setSavingStripe] = useState(false);
+  const [savingPayment, setSavingPayment] = useState(false);
+
+  interface PaymentConfig {
+    sslcommerz_enabled: boolean;
+    sslcommerz_store_id: string;
+    sslcommerz_store_password: string;
+    sslcommerz_sandbox: boolean;
+    cod_enabled: boolean;
+    bkash_enabled: boolean;
+    bkash_number: string;
+    bkash_instructions: string;
+  }
+
+  const defaultPaymentConfig: PaymentConfig = {
+    sslcommerz_enabled: false,
+    sslcommerz_store_id: "",
+    sslcommerz_store_password: "",
+    sslcommerz_sandbox: true,
+    cod_enabled: true,
+    bkash_enabled: false,
+    bkash_number: "",
+    bkash_instructions: "",
+  };
+
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig>(defaultPaymentConfig);
+
+  // Payment settings query
+  const { data: paymentSettings } = useQuery({
+    queryKey: ["store-payment-settings"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("key, value")
+        .like("key", "payment_%");
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => { map[r.key] = r.value; });
+      return map;
+    },
+  });
+
+  useEffect(() => {
+    if (paymentSettings) {
+      setPaymentConfig({
+        sslcommerz_enabled: paymentSettings.payment_sslcommerz_enabled === "true",
+        sslcommerz_store_id: paymentSettings.payment_sslcommerz_store_id || "",
+        sslcommerz_store_password: paymentSettings.payment_sslcommerz_store_password ? "••••••••" : "",
+        sslcommerz_sandbox: paymentSettings.payment_sslcommerz_sandbox !== "false",
+        cod_enabled: paymentSettings.payment_cod_enabled !== "false",
+        bkash_enabled: paymentSettings.payment_bkash_enabled === "true",
+        bkash_number: paymentSettings.payment_bkash_number || "",
+        bkash_instructions: paymentSettings.payment_bkash_instructions || "",
+      });
+    }
+  }, [paymentSettings]);
+
+  const handleSavePayment = async () => {
+    setSavingPayment(true);
+    try {
+      const now = new Date().toISOString();
+      const entries: { key: string; value: string }[] = [
+        { key: "payment_sslcommerz_enabled", value: String(paymentConfig.sslcommerz_enabled) },
+        { key: "payment_sslcommerz_sandbox", value: String(paymentConfig.sslcommerz_sandbox) },
+        { key: "payment_cod_enabled", value: String(paymentConfig.cod_enabled) },
+        { key: "payment_bkash_enabled", value: String(paymentConfig.bkash_enabled) },
+        { key: "payment_bkash_number", value: paymentConfig.bkash_number },
+        { key: "payment_bkash_instructions", value: paymentConfig.bkash_instructions },
+      ];
+
+      // Only save credentials if not masked
+      if (paymentConfig.sslcommerz_store_id && !paymentConfig.sslcommerz_store_id.startsWith("••")) {
+        entries.push({ key: "payment_sslcommerz_store_id", value: paymentConfig.sslcommerz_store_id });
+      }
+      if (paymentConfig.sslcommerz_store_password && !paymentConfig.sslcommerz_store_password.startsWith("••")) {
+        entries.push({ key: "payment_sslcommerz_store_password", value: paymentConfig.sslcommerz_store_password });
+      }
+
+      for (const entry of entries) {
+        const { error } = await supabase
+          .from("store_settings")
+          .upsert({ key: entry.key, value: entry.value, updated_at: now }, { onConflict: "key" });
+        if (error) throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["store-payment-settings"] });
+      toast({ title: "Payment settings saved" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingPayment(false);
+    }
+  };
 
   // Currency
   const { data: currency, isLoading: currLoading } = useQuery({
@@ -66,53 +155,6 @@ const Settings = () => {
       return data?.value || "USD";
     },
   });
-
-  // Stripe settings
-  const { data: stripeSettings } = useQuery({
-    queryKey: ["store-stripe-settings"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("store_settings")
-        .select("key, value")
-        .in("key", ["stripe_enabled", "stripe_secret_key"]);
-      const map: Record<string, string> = {};
-      (data ?? []).forEach((r: any) => { map[r.key] = r.value; });
-      return map;
-    },
-  });
-
-  useEffect(() => {
-    if (stripeSettings) {
-      setStripeEnabled(stripeSettings.stripe_enabled === "true");
-      setStripeKey(stripeSettings.stripe_secret_key ? "••••••••" : "");
-    }
-  }, [stripeSettings]);
-
-  const handleSaveStripe = async () => {
-    setSavingStripe(true);
-    try {
-      // Upsert stripe_enabled
-      const { error: e1 } = await supabase
-        .from("store_settings")
-        .upsert({ key: "stripe_enabled", value: String(stripeEnabled), updated_at: new Date().toISOString() }, { onConflict: "key" });
-      if (e1) throw e1;
-
-      // Upsert stripe key only if changed (not masked)
-      if (stripeKey && !stripeKey.startsWith("••")) {
-        const { error: e2 } = await supabase
-          .from("store_settings")
-          .upsert({ key: "stripe_secret_key", value: stripeKey, updated_at: new Date().toISOString() }, { onConflict: "key" });
-        if (e2) throw e2;
-      }
-
-      queryClient.invalidateQueries({ queryKey: ["store-stripe-settings"] });
-      toast({ title: "Payment settings saved" });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally {
-      setSavingStripe(false);
-    }
-  };
 
   const currencyMutation = useMutation({
     mutationFn: async (code: string) => {
@@ -385,41 +427,78 @@ const Settings = () => {
         </CardContent>
       </Card>
 
-      {/* Payment Gateway */}
+      {/* Payment Methods */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <CreditCard className="h-5 w-5" /> Payment Gateway
+            <CreditCard className="h-5 w-5" /> Payment Methods
           </CardTitle>
-          <CardDescription>Configure online payment for checkout</CardDescription>
+          <CardDescription>Configure which payment options customers see at checkout</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Enable Stripe Payments</p>
-              <p className="text-xs text-muted-foreground">Allow customers to pay online with card</p>
+        <CardContent className="space-y-6">
+          {/* SSLCOMMERZ */}
+          <div className="space-y-3 p-4 border border-border rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">SSLCOMMERZ</p>
+                <p className="text-xs text-muted-foreground">Accept Visa, Mastercard, Amex & more</p>
+              </div>
+              <Switch checked={paymentConfig.sslcommerz_enabled} onCheckedChange={(v) => setPaymentConfig(prev => ({ ...prev, sslcommerz_enabled: v }))} />
             </div>
-            <Switch checked={stripeEnabled} onCheckedChange={setStripeEnabled} />
+            {paymentConfig.sslcommerz_enabled && (
+              <div className="space-y-3 pt-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">Store ID</Label>
+                  <Input value={paymentConfig.sslcommerz_store_id} onChange={(e) => setPaymentConfig(prev => ({ ...prev, sslcommerz_store_id: e.target.value }))} placeholder="your_store_id" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Store Password</Label>
+                  <Input type="password" value={paymentConfig.sslcommerz_store_password} onChange={(e) => setPaymentConfig(prev => ({ ...prev, sslcommerz_store_password: e.target.value }))} placeholder="your_store_password" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={paymentConfig.sslcommerz_sandbox} onCheckedChange={(v) => setPaymentConfig(prev => ({ ...prev, sslcommerz_sandbox: v }))} />
+                  <Label className="text-xs">Sandbox / Test Mode</Label>
+                </div>
+              </div>
+            )}
           </div>
-          {stripeEnabled && (
-            <div className="space-y-2">
-              <Label>Stripe Secret Key</Label>
-              <Input
-                type="password"
-                value={stripeKey}
-                onChange={(e) => setStripeKey(e.target.value)}
-                placeholder="sk_live_... or sk_test_..."
-              />
-              <p className="text-xs text-muted-foreground">
-                Find your key at{" "}
-                <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer" className="underline text-primary">
-                  dashboard.stripe.com/apikeys
-                </a>
-              </p>
+
+          {/* bKash */}
+          <div className="space-y-3 p-4 border border-border rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">bKash</p>
+                <p className="text-xs text-muted-foreground">Mobile payment via bKash</p>
+              </div>
+              <Switch checked={paymentConfig.bkash_enabled} onCheckedChange={(v) => setPaymentConfig(prev => ({ ...prev, bkash_enabled: v }))} />
             </div>
-          )}
-          <Button onClick={handleSaveStripe} disabled={savingStripe}>
-            {savingStripe ? "Saving..." : "Save Payment Settings"}
+            {paymentConfig.bkash_enabled && (
+              <div className="space-y-3 pt-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">bKash Number</Label>
+                  <Input value={paymentConfig.bkash_number} onChange={(e) => setPaymentConfig(prev => ({ ...prev, bkash_number: e.target.value }))} placeholder="01XXXXXXXXX" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Payment Instructions</Label>
+                  <Textarea value={paymentConfig.bkash_instructions} onChange={(e) => setPaymentConfig(prev => ({ ...prev, bkash_instructions: e.target.value }))} placeholder="e.g. Send payment to 01XXXXXXXXX and include your order number as reference" rows={3} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* COD */}
+          <div className="space-y-3 p-4 border border-border rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">Cash on Delivery (COD)</p>
+                <p className="text-xs text-muted-foreground">Customers pay when they receive their order</p>
+              </div>
+              <Switch checked={paymentConfig.cod_enabled} onCheckedChange={(v) => setPaymentConfig(prev => ({ ...prev, cod_enabled: v }))} />
+            </div>
+          </div>
+
+          <Button onClick={handleSavePayment} disabled={savingPayment} className="w-full">
+            {savingPayment ? "Saving..." : "Save Payment Settings"}
           </Button>
         </CardContent>
       </Card>
