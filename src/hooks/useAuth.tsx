@@ -21,15 +21,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isModerator, setIsModerator] = useState(false);
 
-  const checkAdmin = async (userId: string) => {
+  const isStaff = isAdmin || isModerator;
+
+  const checkRoles = async (userId: string) => {
     const { data } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    setIsAdmin(!!data);
+      .eq("user_id", userId);
+    const roles = (data ?? []).map((r) => r.role);
+    setIsAdmin(roles.includes("admin"));
+    setIsModerator(roles.includes("moderator"));
   };
 
   useEffect(() => {
