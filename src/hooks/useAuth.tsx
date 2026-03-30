@@ -26,40 +26,66 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const isStaff = isAdmin || isModerator;
 
   const checkRoles = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    const roles = (data ?? []).map((r) => r.role);
-    setIsAdmin(roles.includes("admin"));
-    setIsModerator(roles.includes("moderator"));
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .in("role", ["admin", "moderator"]);
+
+      if (error) throw error;
+
+      const roles = (data ?? []).map((r) => r.role);
+      setIsAdmin(roles.includes("admin"));
+      setIsModerator(roles.includes("moderator"));
+    } catch {
+      setIsAdmin(false);
+      setIsModerator(false);
+    }
   };
 
   useEffect(() => {
+    let isMounted = true;
+
+    const applySession = async (nextSession: Session | null) => {
+      if (!isMounted) return;
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        await checkRoles(nextSession.user.id);
+      } else {
+        setIsAdmin(false);
+        setIsModerator(false);
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await checkRoles(session.user.id);
-        } else {
-          setIsAdmin(false);
-          setIsModerator(false);
+      async (event, nextSession) => {
+        if (event === "INITIAL_SESSION") return;
+
+        try {
+          await applySession(nextSession);
+        } finally {
+          if (isMounted) setLoading(false);
         }
-        setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await checkRoles(session.user.id);
+    (async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        await applySession(initialSession);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      setLoading(false);
-    });
+    })();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
