@@ -33,10 +33,10 @@ const StoreFooter = () => (
         <div>
           <h4 className="font-heading font-semibold mb-4">Support</h4>
           <ul className="space-y-2 text-sm opacity-60">
-            <li><Link to="/" className="hover:opacity-100 transition">Contact Us</Link></li>
-            <li><Link to="/" className="hover:opacity-100 transition">FAQs</Link></li>
-            <li><Link to="/" className="hover:opacity-100 transition">Shipping & Returns</Link></li>
-            <li><Link to="/" className="hover:opacity-100 transition">Size Guide</Link></li>
+            <li><Link to="/support" className="hover:opacity-100 transition">Contact Us</Link></li>
+            <li><Link to="/support" className="hover:opacity-100 transition">FAQs</Link></li>
+            <li><Link to="/about-us" className="hover:opacity-100 transition">About Us</Link></li>
+            <li><Link to="/support" className="hover:opacity-100 transition">Shipping & Returns</Link></li>
           </ul>
         </div>
 

@@ -191,7 +191,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Revenue</p>
-                <p className="text-2xl font-heading font-bold mt-1">${(stats?.totalRevenue ?? 0).toFixed(0)}</p>
+                <p className="text-2xl font-heading font-bold mt-1">৳{(stats?.totalRevenue ?? 0).toLocaleString()}</p>
                 <p className="text-xs text-destructive flex items-center gap-1 mt-1.5">
                   <TrendingDown className="h-3 w-3" /> -7.5% Since last month
                 </p>
