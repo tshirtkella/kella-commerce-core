@@ -21,7 +21,7 @@ const Shop = () => {
   });
 
   const { data: products = [] } = useQuery({
-    queryKey: ["shop-products", categorySlug],
+    queryKey: ["shop-products", categorySlug, searchQuery],
     queryFn: async () => {
       let q = supabase
         .from("products")
@@ -32,6 +32,10 @@ const Shop = () => {
       if (categorySlug) {
         const cat = categories.find((c) => c.slug === categorySlug);
         if (cat) q = q.eq("category_id", cat.id);
+      }
+
+      if (searchQuery) {
+        q = q.ilike("name", `%${searchQuery}%`);
       }
 
       const { data, error } = await q;

@@ -31,10 +31,7 @@ const StoreHeader = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center relative">
-              <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search products..." className="pl-9 w-48 h-9 bg-muted/50 border-0 focus-visible:ring-1" />
-            </div>
+            <ProductSearch />
             <Button variant="ghost" size="icon" className="h-9 w-9 relative" onClick={() => setIsCartOpen(true)}>
               <ShoppingBag className="h-4 w-4" />
               {totalItems > 0 && (
