@@ -235,7 +235,7 @@ const Dashboard = () => {
                     borderRadius: 8,
                     fontSize: 12,
                   }}
-                  formatter={(value: number) => [`$${value}`, ""]}
+                  formatter={(value: number) => [`৳${value}`, ""]}
                 />
                 <Bar dataKey="revenue" fill="hsl(220, 90%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={32} />
                 <Bar dataKey="cost" fill="hsl(160, 60%, 45%)" radius={[4, 4, 0, 0]} maxBarSize={32} />
