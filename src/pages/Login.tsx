@@ -84,8 +84,8 @@ const Login = () => {
             </h2>
             <p className="text-muted-foreground text-sm">
               {isSignUp
-                ? "Sign up to access the admin dashboard"
-                : "Sign in to your admin dashboard"}
+                ? "Sign up to start shopping"
+                : "Sign in to your account"}
             </p>
           </div>
 
