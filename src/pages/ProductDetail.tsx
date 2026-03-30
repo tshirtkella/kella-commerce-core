@@ -332,7 +332,14 @@ const ProductDetail = () => {
                 </button>
                 <span className="w-12 text-center font-medium text-sm">{quantity}</span>
                 <button
-                  onClick={() => setQuantity((q) => q + 1)}
+                  onClick={() => {
+                    const max = stock ?? Infinity;
+                    if (quantity >= max) {
+                      toast({ title: "Stock limit reached!", description: `Only ${stock} items available.`, variant: "destructive" });
+                      return;
+                    }
+                    setQuantity((q) => q + 1);
+                  }}
                   className="h-11 w-11 flex items-center justify-center hover:bg-muted/50 transition rounded-r-full"
                 >
                   <Plus className="h-4 w-4" />
