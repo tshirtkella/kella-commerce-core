@@ -191,7 +191,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total Revenue</p>
-                <p className="text-2xl font-heading font-bold mt-1">${(stats?.totalRevenue ?? 0).toFixed(0)}</p>
+                <p className="text-2xl font-heading font-bold mt-1">৳{(stats?.totalRevenue ?? 0).toLocaleString()}</p>
                 <p className="text-xs text-destructive flex items-center gap-1 mt-1.5">
                   <TrendingDown className="h-3 w-3" /> -7.5% Since last month
                 </p>
@@ -227,7 +227,7 @@ const Dashboard = () => {
               <BarChart data={revenueData} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 90%)" vertical={false} />
                 <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" />
-                <YAxis tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" tickFormatter={(v) => `$${v / 1000}k`} />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" tickFormatter={(v) => `৳${v / 1000}k`} />
                 <Tooltip
                   contentStyle={{
                     background: "hsl(0, 0%, 100%)",
@@ -235,7 +235,7 @@ const Dashboard = () => {
                     borderRadius: 8,
                     fontSize: 12,
                   }}
-                  formatter={(value: number) => [`$${value}`, ""]}
+                  formatter={(value: number) => [`৳${value}`, ""]}
                 />
                 <Bar dataKey="revenue" fill="hsl(220, 90%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={32} />
                 <Bar dataKey="cost" fill="hsl(160, 60%, 45%)" radius={[4, 4, 0, 0]} maxBarSize={32} />
@@ -366,7 +366,7 @@ const Dashboard = () => {
                       <span className="text-xs text-muted-foreground">
                         {order.order_items?.length ?? 0} item{(order.order_items?.length ?? 0) !== 1 ? "s" : ""}
                       </span>
-                      <span className="font-heading font-bold text-sm">${Number(order.total).toFixed(2)}</span>
+                      <span className="font-heading font-bold text-sm">৳{Number(order.total).toLocaleString()}</span>
                     </div>
                   </div>
                 ))}
