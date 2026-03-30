@@ -42,6 +42,10 @@ const Checkout = () => {
   const [emailOffers, setEmailOffers] = useState(true);
   const [saveInfo, setSaveInfo] = useState(false);
   const [textOffers, setTextOffers] = useState(false);
+  const [attempted, setAttempted] = useState(false);
+
+  const requiredFields = ["email", "firstName", "phone", "address", "city"] as const;
+  const isFieldInvalid = (field: string) => attempted && !form[field as keyof typeof form]?.trim();
 
   // Fetch enabled payment methods from admin settings
   const { data: paymentSettings } = useQuery({
