@@ -52,6 +52,13 @@ const Settings = () => {
   const [inviteRole, setInviteRole] = useState<AppRole>("user");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [savingPayment, setSavingPayment] = useState(false);
+  const [savingBranding, setSavingBranding] = useState(false);
+
+  const [brandingForm, setBrandingForm] = useState({
+    store_name: "T-Shirt Kella",
+    logo_url: "",
+    favicon_url: "",
+  });
 
   interface PaymentConfig {
     sslcommerz_enabled: boolean;
