@@ -9,6 +9,7 @@ const Shop = () => {
   const { format } = useCurrency();
   const [searchParams] = useSearchParams();
   const categorySlug = searchParams.get("category");
+  const searchQuery = searchParams.get("search") || "";
 
   const { data: categories = [] } = useQuery({
     queryKey: ["shop-categories"],
@@ -20,7 +21,7 @@ const Shop = () => {
   });
 
   const { data: products = [] } = useQuery({
-    queryKey: ["shop-products", categorySlug],
+    queryKey: ["shop-products", categorySlug, searchQuery],
     queryFn: async () => {
       let q = supabase
         .from("products")
@@ -31,6 +32,10 @@ const Shop = () => {
       if (categorySlug) {
         const cat = categories.find((c) => c.slug === categorySlug);
         if (cat) q = q.eq("category_id", cat.id);
+      }
+
+      if (searchQuery) {
+        q = q.ilike("name", `%${searchQuery}%`);
       }
 
       const { data, error } = await q;
@@ -46,9 +51,11 @@ const Shop = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold font-heading">
-            {categorySlug
-              ? categories.find((c) => c.slug === categorySlug)?.name ?? "Shop"
-              : "All Products"}
+            {searchQuery
+              ? `Results for "${searchQuery}"`
+              : categorySlug
+                ? categories.find((c) => c.slug === categorySlug)?.name ?? "Shop"
+                : "All Products"}
           </h1>
         </div>
 
