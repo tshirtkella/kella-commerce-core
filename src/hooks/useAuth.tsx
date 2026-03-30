@@ -36,30 +36,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
+    const applySession = async (nextSession: Session | null) => {
+      if (!isMounted) return;
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        await checkRoles(nextSession.user.id);
+      } else {
+        setIsAdmin(false);
+        setIsModerator(false);
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await checkRoles(session.user.id);
-        } else {
-          setIsAdmin(false);
-          setIsModerator(false);
-        }
-        setLoading(false);
+      async (event, nextSession) => {
+        if (event === "INITIAL_SESSION") return;
+        await applySession(nextSession);
+        if (isMounted) setLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await checkRoles(session.user.id);
-      }
-      setLoading(false);
-    });
+    (async () => {
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      await applySession(initialSession);
+      if (isMounted) setLoading(false);
+    })();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
