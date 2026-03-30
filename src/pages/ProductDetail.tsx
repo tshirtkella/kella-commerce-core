@@ -123,7 +123,11 @@ const ProductDetail = () => {
     }
     const item = buildCartItem();
     if (item) {
-      addItem(item);
+      const success = addItem(item);
+      if (!success) {
+        toast({ title: "Stock limit reached!", description: `Only ${stock} items available for this variant.`, variant: "destructive" });
+        return;
+      }
       navigate("/checkout");
     }
   };
