@@ -30,7 +30,7 @@ const Storefront = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("*, categories(name), variants(price_override, inventory_quantity)")
+        .select("*, categories(name), variants(price_override, inventory_quantity), images(url, alt_text, position)")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(8);
