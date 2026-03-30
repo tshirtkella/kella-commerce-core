@@ -10,6 +10,7 @@ export interface CartItem {
   quantity: number;
   image?: string;
   slug: string;
+  maxStock?: number;
 }
 
 interface CartContextType {
