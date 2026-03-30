@@ -107,14 +107,19 @@ const Storefront = () => {
                 className="group relative rounded-xl overflow-hidden aspect-square flex items-end p-4"
                 style={{ backgroundColor: categoryColors[i % categoryColors.length] + "18" }}
               >
-                <div
-                  className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity"
-                  style={{ backgroundColor: categoryColors[i % categoryColors.length] }}
-                />
+                {(cat as any).image_url ? (
+                  <img src={(cat as any).image_url} alt={cat.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                ) : (
+                  <div
+                    className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity"
+                    style={{ backgroundColor: categoryColors[i % categoryColors.length] }}
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="relative z-10">
-                  <p className="font-semibold text-sm">{cat.name}</p>
+                  <p className="font-semibold text-sm text-white">{cat.name}</p>
                   {cat.description && (
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{cat.description}</p>
+                    <p className="text-xs text-white/70 mt-0.5 line-clamp-1">{cat.description}</p>
                   )}
                 </div>
               </Link>
@@ -151,7 +156,11 @@ const Storefront = () => {
                     >
                       {/* Placeholder image */}
                       <div className="aspect-square bg-muted/50 flex items-center justify-center relative overflow-hidden">
-                        <span className="text-4xl opacity-20">👕</span>
+                        {product.images?.[0]?.url ? (
+                          <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        ) : (
+                          <span className="text-4xl opacity-20">👕</span>
+                        )}
                         {totalStock === 0 && (
                           <span className="absolute top-2 left-2 text-[10px] font-bold bg-destructive text-destructive-foreground px-2 py-0.5 rounded">
                             SOLD OUT
