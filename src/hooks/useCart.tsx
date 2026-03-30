@@ -44,19 +44,26 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(CART_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem = (item: CartItem) => {
+  const addItem = (item: CartItem): boolean => {
+    const existing = items.find((i) => i.variantId === item.variantId);
+    const currentQty = existing ? existing.quantity : 0;
+    const maxStock = item.maxStock ?? Infinity;
+    if (currentQty + item.quantity > maxStock) {
+      return false; // stock exceeded
+    }
     setItems((prev) => {
-      const existing = prev.find((i) => i.variantId === item.variantId);
-      if (existing) {
+      const ex = prev.find((i) => i.variantId === item.variantId);
+      if (ex) {
         return prev.map((i) =>
           i.variantId === item.variantId
-            ? { ...i, quantity: i.quantity + item.quantity }
+            ? { ...i, quantity: i.quantity + item.quantity, maxStock: item.maxStock }
             : i
         );
       }
       return [...prev, item];
     });
     setIsCartOpen(true);
+    return true;
   };
 
   const removeItem = (variantId: string) => {
