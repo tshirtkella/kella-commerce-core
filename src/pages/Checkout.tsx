@@ -51,6 +51,8 @@ const Checkout = () => {
         .from("store_settings")
         .select("key, value")
         .like("key", "payment_%");
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => { map[r.key] = r.value; });
       const hasAnySettings = Object.keys(map).length > 0;
       return {
         sslcommerz: hasAnySettings ? map.payment_sslcommerz_enabled === "true" : true,
