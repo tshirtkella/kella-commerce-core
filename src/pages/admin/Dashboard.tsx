@@ -227,7 +227,7 @@ const Dashboard = () => {
               <BarChart data={revenueData} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 90%)" vertical={false} />
                 <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" />
-                <YAxis tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" tickFormatter={(v) => `$${v / 1000}k`} />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(220, 10%, 46%)" tickFormatter={(v) => `৳${v / 1000}k`} />
                 <Tooltip
                   contentStyle={{
                     background: "hsl(0, 0%, 100%)",
