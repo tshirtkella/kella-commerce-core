@@ -26,13 +26,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const isStaff = isAdmin || isModerator;
 
   const checkRoles = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    const roles = (data ?? []).map((r) => r.role);
-    setIsAdmin(roles.includes("admin"));
-    setIsModerator(roles.includes("moderator"));
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .in("role", ["admin", "moderator"]);
+
+      if (error) throw error;
+
+      const roles = (data ?? []).map((r) => r.role);
+      setIsAdmin(roles.includes("admin"));
+      setIsModerator(roles.includes("moderator"));
+    } catch {
+      setIsAdmin(false);
+      setIsModerator(false);
+    }
   };
 
   useEffect(() => {
@@ -55,15 +64,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, nextSession) => {
         if (event === "INITIAL_SESSION") return;
-        await applySession(nextSession);
-        if (isMounted) setLoading(false);
+
+        try {
+          await applySession(nextSession);
+        } finally {
+          if (isMounted) setLoading(false);
+        }
       }
     );
 
     (async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      await applySession(initialSession);
-      if (isMounted) setLoading(false);
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        await applySession(initialSession);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     })();
 
     return () => {
