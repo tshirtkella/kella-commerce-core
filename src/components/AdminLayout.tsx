@@ -38,7 +38,7 @@ const AdminLayout = () => {
   }
 
   if (!user) return <Navigate to="/login" replace />;
-  if (!isAdmin) return <Navigate to="/" replace />;
+  if (!isStaff) return <Navigate to="/" replace />;
 
   const currentPage = navItems.find((item) =>
     item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to)

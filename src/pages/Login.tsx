@@ -51,17 +51,17 @@ const Login = () => {
               T-Shirt Kella
             </h1>
             <p className="text-sidebar-foreground text-lg leading-relaxed">
-              Manage your store, track orders, and grow your business — all from one place.
+              Discover the latest trends and shop your favorite styles.
             </p>
           </div>
           <div className="flex items-center justify-center gap-6 text-sidebar-foreground/60 text-sm">
             <span className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              Real-time analytics
+              Fast delivery
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              Inventory sync
+              Easy returns
             </span>
           </div>
         </div>
