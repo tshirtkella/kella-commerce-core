@@ -143,6 +143,19 @@ const Settings = () => {
     }
   };
 
+  // Currency
+  const { data: currency, isLoading: currLoading } = useQuery({
+    queryKey: ["store-currency"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("value")
+        .eq("key", "currency")
+        .maybeSingle();
+      return data?.value || "USD";
+    },
+  });
+
   const currencyMutation = useMutation({
     mutationFn: async (code: string) => {
       const { error } = await supabase
