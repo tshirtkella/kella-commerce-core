@@ -88,6 +88,7 @@ const ProductDetail = () => {
       quantity,
       image: images[0]?.url,
       slug: product.slug,
+      maxStock: stock ?? undefined,
     };
   };
 
@@ -102,7 +103,11 @@ const ProductDetail = () => {
     }
     const item = buildCartItem();
     if (item) {
-      addItem(item);
+      const success = addItem(item);
+      if (!success) {
+        toast({ title: "Stock limit reached!", description: `Only ${stock} items available for this variant.`, variant: "destructive" });
+        return;
+      }
       toast({ title: "Added to cart!", description: `${product?.name} — ${selectedColor} / ${selectedSize} × ${quantity}` });
     }
   };
