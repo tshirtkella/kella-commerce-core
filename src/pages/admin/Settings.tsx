@@ -58,7 +58,7 @@ const Settings = () => {
   const { data: currency, isLoading: currLoading } = useQuery({
     queryKey: ["store-currency"],
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("store_settings")
         .select("value")
         .eq("key", "currency")
@@ -66,6 +66,53 @@ const Settings = () => {
       return data?.value || "USD";
     },
   });
+
+  // Stripe settings
+  const { data: stripeSettings } = useQuery({
+    queryKey: ["store-stripe-settings"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("key, value")
+        .in("key", ["stripe_enabled", "stripe_secret_key"]);
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => { map[r.key] = r.value; });
+      return map;
+    },
+  });
+
+  useEffect(() => {
+    if (stripeSettings) {
+      setStripeEnabled(stripeSettings.stripe_enabled === "true");
+      setStripeKey(stripeSettings.stripe_secret_key ? "••••••••" : "");
+    }
+  }, [stripeSettings]);
+
+  const handleSaveStripe = async () => {
+    setSavingStripe(true);
+    try {
+      // Upsert stripe_enabled
+      const { error: e1 } = await supabase
+        .from("store_settings")
+        .upsert({ key: "stripe_enabled", value: String(stripeEnabled), updated_at: new Date().toISOString() }, { onConflict: "key" });
+      if (e1) throw e1;
+
+      // Upsert stripe key only if changed (not masked)
+      if (stripeKey && !stripeKey.startsWith("••")) {
+        const { error: e2 } = await supabase
+          .from("store_settings")
+          .upsert({ key: "stripe_secret_key", value: stripeKey, updated_at: new Date().toISOString() }, { onConflict: "key" });
+        if (e2) throw e2;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["store-stripe-settings"] });
+      toast({ title: "Payment settings saved" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingStripe(false);
+    }
+  };
 
   const currencyMutation = useMutation({
     mutationFn: async (code: string) => {
