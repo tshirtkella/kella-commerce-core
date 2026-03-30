@@ -35,13 +35,36 @@ const Checkout = () => {
   const navigate = useNavigate();
 
   const [shippingZone, setShippingZone] = useState<ShippingZone>("inside_dhaka");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("sslcommerz");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
   const [billingOption, setBillingOption] = useState<BillingOption>("same");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [discountCode, setDiscountCode] = useState("");
   const [emailOffers, setEmailOffers] = useState(true);
   const [saveInfo, setSaveInfo] = useState(false);
   const [textOffers, setTextOffers] = useState(false);
+
+  // Fetch enabled payment methods from admin settings
+  const { data: paymentSettings } = useQuery({
+    queryKey: ["store-payment-settings-checkout"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("key, value")
+        .like("key", "payment_%");
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => { map[r.key] = r.value; });
+      return {
+        sslcommerz: map.payment_sslcommerz_enabled === "true",
+        cod: map.payment_cod_enabled !== "false", // default true
+        bkash: map.payment_bkash_enabled === "true",
+        bkash_number: map.payment_bkash_number || "",
+        bkash_instructions: map.payment_bkash_instructions || "",
+      };
+    },
+    staleTime: 30_000,
+  });
+
+  const enabledMethods = paymentSettings ?? { sslcommerz: false, cod: true, bkash: false, bkash_number: "", bkash_instructions: "" };
 
   const [form, setForm] = useState({
     email: "",
