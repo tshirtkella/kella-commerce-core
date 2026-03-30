@@ -70,11 +70,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setItems((prev) => prev.filter((i) => i.variantId !== variantId));
   };
 
-  const updateQuantity = (variantId: string, quantity: number) => {
-    if (quantity <= 0) return removeItem(variantId);
+  const updateQuantity = (variantId: string, quantity: number): boolean => {
+    if (quantity <= 0) { removeItem(variantId); return true; }
+    const item = items.find((i) => i.variantId === variantId);
+    if (item?.maxStock && quantity > item.maxStock) return false;
     setItems((prev) =>
       prev.map((i) => (i.variantId === variantId ? { ...i, quantity } : i))
     );
+    return true;
   };
 
   const clearCart = () => setItems([]);
