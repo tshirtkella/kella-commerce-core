@@ -43,9 +43,31 @@ const Checkout = () => {
   const [saveInfo, setSaveInfo] = useState(false);
   const [textOffers, setTextOffers] = useState(false);
   const [attempted, setAttempted] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const requiredFields = ["email", "firstName", "phone", "address", "city"] as const;
-  const isFieldInvalid = (field: string) => attempted && !form[field as keyof typeof form]?.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^[\d+\-() ]{7,15}$/;
+
+  const validateForm = (): Record<string, string> => {
+    const errors: Record<string, string> = {};
+    if (!form.email.trim()) errors.email = "Email is required";
+    else if (!emailRegex.test(form.email.trim())) errors.email = "Enter a valid email address";
+
+    if (!form.firstName.trim()) errors.firstName = "First name is required";
+    else if (form.firstName.trim().length < 2) errors.firstName = "First name must be at least 2 characters";
+
+    if (!form.phone.trim()) errors.phone = "Phone is required";
+    else if (!phoneRegex.test(form.phone.trim())) errors.phone = "Enter a valid phone number";
+
+    if (!form.address.trim()) errors.address = "Address is required";
+    else if (form.address.trim().length < 5) errors.address = "Enter a complete address";
+
+    if (!form.city.trim()) errors.city = "City is required";
+
+    return errors;
+  };
+
+  const getFieldError = (field: string) => attempted ? fieldErrors[field] : undefined;
 
   // Fetch enabled payment methods from admin settings
   const { data: paymentSettings } = useQuery({
