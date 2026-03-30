@@ -148,9 +148,9 @@ const Profile = () => {
 
   const menuItems = [
     { label: "Edit Profile", icon: Edit2, onClick: () => setEditOpen(true) },
-    { label: "Shipping Address", icon: MapPin, onClick: () => toast({ title: "Coming soon" }) },
-    { label: "Support", icon: Headphones, onClick: () => toast({ title: "Coming soon" }) },
-    { label: "About Us", icon: Info, onClick: () => toast({ title: "Coming soon" }) },
+    { label: "Shipping Address", icon: MapPin, onClick: () => navigate("/shipping-address") },
+    { label: "Support", icon: Headphones, onClick: () => navigate("/support") },
+    { label: "About Us", icon: Info, onClick: () => navigate("/about-us") },
   ];
 
   return (
