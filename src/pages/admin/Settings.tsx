@@ -427,41 +427,78 @@ const Settings = () => {
         </CardContent>
       </Card>
 
-      {/* Payment Gateway */}
+      {/* Payment Methods */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <CreditCard className="h-5 w-5" /> Payment Gateway
+            <CreditCard className="h-5 w-5" /> Payment Methods
           </CardTitle>
-          <CardDescription>Configure online payment for checkout</CardDescription>
+          <CardDescription>Configure which payment options customers see at checkout</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Enable Stripe Payments</p>
-              <p className="text-xs text-muted-foreground">Allow customers to pay online with card</p>
+        <CardContent className="space-y-6">
+          {/* SSLCOMMERZ */}
+          <div className="space-y-3 p-4 border border-border rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">SSLCOMMERZ</p>
+                <p className="text-xs text-muted-foreground">Accept Visa, Mastercard, Amex & more</p>
+              </div>
+              <Switch checked={paymentConfig.sslcommerz_enabled} onCheckedChange={(v) => setPaymentConfig(prev => ({ ...prev, sslcommerz_enabled: v }))} />
             </div>
-            <Switch checked={stripeEnabled} onCheckedChange={setStripeEnabled} />
+            {paymentConfig.sslcommerz_enabled && (
+              <div className="space-y-3 pt-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">Store ID</Label>
+                  <Input value={paymentConfig.sslcommerz_store_id} onChange={(e) => setPaymentConfig(prev => ({ ...prev, sslcommerz_store_id: e.target.value }))} placeholder="your_store_id" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Store Password</Label>
+                  <Input type="password" value={paymentConfig.sslcommerz_store_password} onChange={(e) => setPaymentConfig(prev => ({ ...prev, sslcommerz_store_password: e.target.value }))} placeholder="your_store_password" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={paymentConfig.sslcommerz_sandbox} onCheckedChange={(v) => setPaymentConfig(prev => ({ ...prev, sslcommerz_sandbox: v }))} />
+                  <Label className="text-xs">Sandbox / Test Mode</Label>
+                </div>
+              </div>
+            )}
           </div>
-          {stripeEnabled && (
-            <div className="space-y-2">
-              <Label>Stripe Secret Key</Label>
-              <Input
-                type="password"
-                value={stripeKey}
-                onChange={(e) => setStripeKey(e.target.value)}
-                placeholder="sk_live_... or sk_test_..."
-              />
-              <p className="text-xs text-muted-foreground">
-                Find your key at{" "}
-                <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer" className="underline text-primary">
-                  dashboard.stripe.com/apikeys
-                </a>
-              </p>
+
+          {/* bKash */}
+          <div className="space-y-3 p-4 border border-border rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">bKash</p>
+                <p className="text-xs text-muted-foreground">Mobile payment via bKash</p>
+              </div>
+              <Switch checked={paymentConfig.bkash_enabled} onCheckedChange={(v) => setPaymentConfig(prev => ({ ...prev, bkash_enabled: v }))} />
             </div>
-          )}
-          <Button onClick={handleSaveStripe} disabled={savingStripe}>
-            {savingStripe ? "Saving..." : "Save Payment Settings"}
+            {paymentConfig.bkash_enabled && (
+              <div className="space-y-3 pt-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">bKash Number</Label>
+                  <Input value={paymentConfig.bkash_number} onChange={(e) => setPaymentConfig(prev => ({ ...prev, bkash_number: e.target.value }))} placeholder="01XXXXXXXXX" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Payment Instructions</Label>
+                  <Textarea value={paymentConfig.bkash_instructions} onChange={(e) => setPaymentConfig(prev => ({ ...prev, bkash_instructions: e.target.value }))} placeholder="e.g. Send payment to 01XXXXXXXXX and include your order number as reference" rows={3} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* COD */}
+          <div className="space-y-3 p-4 border border-border rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">Cash on Delivery (COD)</p>
+                <p className="text-xs text-muted-foreground">Customers pay when they receive their order</p>
+              </div>
+              <Switch checked={paymentConfig.cod_enabled} onCheckedChange={(v) => setPaymentConfig(prev => ({ ...prev, cod_enabled: v }))} />
+            </div>
+          </div>
+
+          <Button onClick={handleSavePayment} disabled={savingPayment} className="w-full">
+            {savingPayment ? "Saving..." : "Save Payment Settings"}
           </Button>
         </CardContent>
       </Card>
