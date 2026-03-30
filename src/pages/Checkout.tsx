@@ -51,10 +51,8 @@ const Checkout = () => {
         .from("store_settings")
         .select("key, value")
         .like("key", "payment_%");
-      const map: Record<string, string> = {};
-      (data ?? []).forEach((r: any) => { map[r.key] = r.value; });
+      const hasAnySettings = Object.keys(map).length > 0;
       return {
-        const hasAnySettings = Object.keys(map).length > 0;
         sslcommerz: hasAnySettings ? map.payment_sslcommerz_enabled === "true" : true,
         cod: map.payment_cod_enabled !== "false",
         bkash: hasAnySettings ? map.payment_bkash_enabled === "true" : true,
