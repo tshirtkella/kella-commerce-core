@@ -113,6 +113,55 @@ const Settings = () => {
     }
   }, [paymentSettings]);
 
+  // Branding settings query
+  const { data: brandingSettings } = useQuery({
+    queryKey: ["store-branding-admin"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("store_settings")
+        .select("key, value")
+        .in("key", ["store_name", "logo_url", "favicon_url"]);
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => { map[r.key] = r.value; });
+      return map;
+    },
+  });
+
+  useEffect(() => {
+    if (brandingSettings) {
+      setBrandingForm({
+        store_name: brandingSettings.store_name || "T-Shirt Kella",
+        logo_url: brandingSettings.logo_url || "",
+        favicon_url: brandingSettings.favicon_url || "",
+      });
+    }
+  }, [brandingSettings]);
+
+  const handleSaveBranding = async () => {
+    setSavingBranding(true);
+    try {
+      const now = new Date().toISOString();
+      const entries = [
+        { key: "store_name", value: brandingForm.store_name },
+        { key: "logo_url", value: brandingForm.logo_url },
+        { key: "favicon_url", value: brandingForm.favicon_url },
+      ];
+      for (const entry of entries) {
+        const { error } = await supabase
+          .from("store_settings")
+          .upsert({ key: entry.key, value: entry.value, updated_at: now }, { onConflict: "key" });
+        if (error) throw error;
+      }
+      queryClient.invalidateQueries({ queryKey: ["store-branding"] });
+      queryClient.invalidateQueries({ queryKey: ["store-branding-admin"] });
+      toast({ title: "Branding settings saved" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingBranding(false);
+    }
+  };
+
   const handleSavePayment = async () => {
     setSavingPayment(true);
     try {
