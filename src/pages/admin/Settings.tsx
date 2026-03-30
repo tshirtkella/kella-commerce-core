@@ -385,7 +385,45 @@ const Settings = () => {
         </CardContent>
       </Card>
 
-      {/* Change Password */}
+      {/* Payment Gateway */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <CreditCard className="h-5 w-5" /> Payment Gateway
+          </CardTitle>
+          <CardDescription>Configure online payment for checkout</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Enable Stripe Payments</p>
+              <p className="text-xs text-muted-foreground">Allow customers to pay online with card</p>
+            </div>
+            <Switch checked={stripeEnabled} onCheckedChange={setStripeEnabled} />
+          </div>
+          {stripeEnabled && (
+            <div className="space-y-2">
+              <Label>Stripe Secret Key</Label>
+              <Input
+                type="password"
+                value={stripeKey}
+                onChange={(e) => setStripeKey(e.target.value)}
+                placeholder="sk_live_... or sk_test_..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Find your key at{" "}
+                <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer" className="underline text-primary">
+                  dashboard.stripe.com/apikeys
+                </a>
+              </p>
+            </div>
+          )}
+          <Button onClick={handleSaveStripe} disabled={savingStripe}>
+            {savingStripe ? "Saving..." : "Save Payment Settings"}
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
