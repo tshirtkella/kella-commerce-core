@@ -576,17 +576,69 @@ const Settings = () => {
         </CardContent>
       </Card>
 
+      {/* Branding */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Image className="h-5 w-5" /> Branding
+          </CardTitle>
+          <CardDescription>Customize your store name, logo and favicon</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Store Name</Label>
+            <Input
+              value={brandingForm.store_name}
+              onChange={(e) => setBrandingForm(prev => ({ ...prev, store_name: e.target.value }))}
+              placeholder="Your Store Name"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Logo URL</Label>
+            <Input
+              value={brandingForm.logo_url}
+              onChange={(e) => setBrandingForm(prev => ({ ...prev, logo_url: e.target.value }))}
+              placeholder="https://example.com/logo.png"
+            />
+            {brandingForm.logo_url && (
+              <div className="mt-2 p-3 border border-border rounded-lg bg-muted/30 flex items-center gap-3">
+                <img src={brandingForm.logo_url} alt="Logo preview" className="h-10 w-10 object-contain rounded" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <span className="text-xs text-muted-foreground">Logo preview</span>
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label>Favicon URL</Label>
+            <Input
+              value={brandingForm.favicon_url}
+              onChange={(e) => setBrandingForm(prev => ({ ...prev, favicon_url: e.target.value }))}
+              placeholder="https://example.com/favicon.png"
+            />
+            {brandingForm.favicon_url && (
+              <div className="mt-2 p-3 border border-border rounded-lg bg-muted/30 flex items-center gap-3">
+                <img src={brandingForm.favicon_url} alt="Favicon preview" className="h-6 w-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <span className="text-xs text-muted-foreground">Favicon preview</span>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">Recommended: 32x32 or 64x64 PNG image</p>
+          </div>
+          <Button onClick={handleSaveBranding} disabled={savingBranding} className="w-full">
+            {savingBranding ? "Saving..." : "Save Branding"}
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Store Info */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Shirt className="h-5 w-5" /> Store Info
+            <Globe className="h-5 w-5" /> Store Info
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex justify-between items-center py-2 border-b border-border">
             <span className="text-sm text-muted-foreground">Store Name</span>
-            <span className="text-sm font-medium">T-Shirt Kella</span>
+            <span className="text-sm font-medium">{brandingForm.store_name}</span>
           </div>
           <div className="flex justify-between items-center py-2">
             <span className="text-sm text-muted-foreground">Platform</span>
