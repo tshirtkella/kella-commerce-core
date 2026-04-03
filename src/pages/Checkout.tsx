@@ -19,7 +19,7 @@ import StoreFooter from "@/components/storefront/StoreFooter";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type ShippingZone = "inside_dhaka" | "sub_dhaka" | "outside_dhaka";
-type PaymentMethod = "cod" | "sslcommerz" | "bkash";
+type PaymentMethod = "cod" | "sslcommerz" | "bkash" | "nagad";
 type BillingOption = "same" | "different";
 
 const SHIPPING_ZONES: { value: ShippingZone; label: string; description?: string; price: number }[] = [
@@ -90,12 +90,15 @@ const Checkout = () => {
         bkash: hasAnySettings ? map.payment_bkash_enabled === "true" : true,
         bkash_number: map.payment_bkash_number || "",
         bkash_instructions: map.payment_bkash_instructions || "",
+        nagad: hasAnySettings ? map.payment_nagad_enabled === "true" : true,
+        nagad_number: map.payment_nagad_number || "",
+        nagad_instructions: map.payment_nagad_instructions || "",
       };
     },
     staleTime: 30_000,
   });
 
-  const enabledMethods = paymentSettings ?? { sslcommerz: true, cod: true, bkash: true, bkash_number: "", bkash_instructions: "" };
+  const enabledMethods = paymentSettings ?? { sslcommerz: true, cod: true, bkash: true, bkash_number: "", bkash_instructions: "", nagad: true, nagad_number: "", nagad_instructions: "" };
 
   const [form, setForm] = useState({
     email: "",
@@ -236,6 +239,8 @@ const Checkout = () => {
         toast({ title: "Online payment coming soon!", description: "Your order has been placed as COD for now." });
       } else if (paymentMethod === "bkash") {
         toast({ title: "bKash payment coming soon!", description: "Your order has been placed as COD for now." });
+      } else if (paymentMethod === "nagad") {
+        toast({ title: "Nagad payment coming soon!", description: "Your order has been placed as COD for now." });
       }
 
       clearCart();
@@ -440,8 +445,41 @@ const Checkout = () => {
                       }`}
                     >
                       <RadioGroupItem value="bkash" />
-                      <span className="text-sm font-semibold text-foreground">bkash</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold" style={{ color: "#E2136E" }}>bKash</span>
+                        {enabledMethods.bkash_number && (
+                          <span className="text-xs text-muted-foreground">({enabledMethods.bkash_number})</span>
+                        )}
+                      </div>
                     </label>
+                    {paymentMethod === "bkash" && enabledMethods.bkash_instructions && (
+                      <div className="px-4 pb-4 bg-muted/20 border-t border-border">
+                        <p className="text-sm text-muted-foreground py-3 whitespace-pre-line">{enabledMethods.bkash_instructions}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {enabledMethods.nagad && (
+                  <>
+                    <label
+                      className={`flex items-center gap-3 p-4 cursor-pointer transition border-t border-border ${
+                        paymentMethod === "nagad" ? "bg-primary/5 border-primary" : "hover:bg-muted/30"
+                      }`}
+                    >
+                      <RadioGroupItem value="nagad" />
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold" style={{ color: "#F6921E" }}>Nagad</span>
+                        {enabledMethods.nagad_number && (
+                          <span className="text-xs text-muted-foreground">({enabledMethods.nagad_number})</span>
+                        )}
+                      </div>
+                    </label>
+                    {paymentMethod === "nagad" && enabledMethods.nagad_instructions && (
+                      <div className="px-4 pb-4 bg-muted/20 border-t border-border">
+                        <p className="text-sm text-muted-foreground py-3 whitespace-pre-line">{enabledMethods.nagad_instructions}</p>
+                      </div>
+                    )}
                   </>
                 )}
               </RadioGroup>
