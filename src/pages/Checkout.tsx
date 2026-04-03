@@ -227,6 +227,14 @@ const Checkout = () => {
       const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
       if (itemsErr) throw itemsErr;
 
+      // Increment promo code used_count
+      if (appliedPromo) {
+        await supabase
+          .from("promo_codes")
+          .update({ used_count: (appliedPromo as any).used_count ? (appliedPromo as any).used_count + 1 : 1 })
+          .eq("id", appliedPromo.id);
+      }
+
       if (paymentMethod === "sslcommerz") {
         toast({ title: "Online payment coming soon!", description: "Your order has been placed as COD for now." });
       } else if (paymentMethod === "bkash") {
