@@ -201,12 +201,12 @@ const Checkout = () => {
         .insert({
           order_number: orderNumber,
           customer_id: customer.id,
-          subtotal: totalPrice,
+          subtotal: discountedSubtotal,
           shipping_cost: shippingCost,
           tax,
           total: grandTotal,
           shipping_address: shippingAddress,
-          notes: `Shipping: ${shippingZone} | Payment: ${paymentMethod}`,
+          notes: `Shipping: ${shippingZone} | Payment: ${paymentMethod}${appliedPromo ? ` | Promo: ${appliedPromo.code} (-${appliedPromo.discount_type === "percentage" ? appliedPromo.discount_value + "%" : "৳" + appliedPromo.discount_value})` : ""}`,
           status: paymentMethod === "cod" ? "confirmed" : "pending",
         })
         .select("id")
