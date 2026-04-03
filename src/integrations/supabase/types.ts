@@ -392,6 +392,51 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          code: string
+          created_at: string
+          discount_type: string
+          discount_value: number
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_order_amount: number
+          starts_at: string | null
+          updated_at: string
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_order_amount?: number
+          starts_at?: string | null
+          updated_at?: string
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_order_amount?: number
+          starts_at?: string | null
+          updated_at?: string
+          used_count?: number
+        }
+        Relationships: []
+      }
       shipping_addresses: {
         Row: {
           address_line1: string
