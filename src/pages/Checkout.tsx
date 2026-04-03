@@ -19,7 +19,7 @@ import StoreFooter from "@/components/storefront/StoreFooter";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type ShippingZone = "inside_dhaka" | "sub_dhaka" | "outside_dhaka";
-type PaymentMethod = "cod" | "sslcommerz" | "bkash";
+type PaymentMethod = "cod" | "sslcommerz" | "bkash" | "nagad";
 type BillingOption = "same" | "different";
 
 const SHIPPING_ZONES: { value: ShippingZone; label: string; description?: string; price: number }[] = [
