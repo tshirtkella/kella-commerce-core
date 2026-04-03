@@ -182,6 +182,9 @@ const Settings = () => {
         { key: "payment_bkash_enabled", value: String(paymentConfig.bkash_enabled) },
         { key: "payment_bkash_number", value: paymentConfig.bkash_number },
         { key: "payment_bkash_instructions", value: paymentConfig.bkash_instructions },
+        { key: "payment_nagad_enabled", value: String(paymentConfig.nagad_enabled) },
+        { key: "payment_nagad_number", value: paymentConfig.nagad_number },
+        { key: "payment_nagad_instructions", value: paymentConfig.nagad_instructions },
       ];
 
       // Only save credentials if not masked
