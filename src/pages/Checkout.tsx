@@ -239,6 +239,8 @@ const Checkout = () => {
         toast({ title: "Online payment coming soon!", description: "Your order has been placed as COD for now." });
       } else if (paymentMethod === "bkash") {
         toast({ title: "bKash payment coming soon!", description: "Your order has been placed as COD for now." });
+      } else if (paymentMethod === "nagad") {
+        toast({ title: "Nagad payment coming soon!", description: "Your order has been placed as COD for now." });
       }
 
       clearCart();
