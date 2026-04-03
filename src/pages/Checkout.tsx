@@ -445,8 +445,41 @@ const Checkout = () => {
                       }`}
                     >
                       <RadioGroupItem value="bkash" />
-                      <span className="text-sm font-semibold text-foreground">bkash</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold" style={{ color: "#E2136E" }}>bKash</span>
+                        {enabledMethods.bkash_number && (
+                          <span className="text-xs text-muted-foreground">({enabledMethods.bkash_number})</span>
+                        )}
+                      </div>
                     </label>
+                    {paymentMethod === "bkash" && enabledMethods.bkash_instructions && (
+                      <div className="px-4 pb-4 bg-muted/20 border-t border-border">
+                        <p className="text-sm text-muted-foreground py-3 whitespace-pre-line">{enabledMethods.bkash_instructions}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {enabledMethods.nagad && (
+                  <>
+                    <label
+                      className={`flex items-center gap-3 p-4 cursor-pointer transition border-t border-border ${
+                        paymentMethod === "nagad" ? "bg-primary/5 border-primary" : "hover:bg-muted/30"
+                      }`}
+                    >
+                      <RadioGroupItem value="nagad" />
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold" style={{ color: "#F6921E" }}>Nagad</span>
+                        {enabledMethods.nagad_number && (
+                          <span className="text-xs text-muted-foreground">({enabledMethods.nagad_number})</span>
+                        )}
+                      </div>
+                    </label>
+                    {paymentMethod === "nagad" && enabledMethods.nagad_instructions && (
+                      <div className="px-4 pb-4 bg-muted/20 border-t border-border">
+                        <p className="text-sm text-muted-foreground py-3 whitespace-pre-line">{enabledMethods.nagad_instructions}</p>
+                      </div>
+                    )}
                   </>
                 )}
               </RadioGroup>

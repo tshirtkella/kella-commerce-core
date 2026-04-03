@@ -554,6 +554,29 @@ const Settings = () => {
             )}
           </div>
 
+          {/* Nagad */}
+          <div className="space-y-3 p-4 border border-border rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">Nagad</p>
+                <p className="text-xs text-muted-foreground">Mobile payment via Nagad</p>
+              </div>
+              <Switch checked={paymentConfig.nagad_enabled} onCheckedChange={(v) => setPaymentConfig(prev => ({ ...prev, nagad_enabled: v }))} />
+            </div>
+            {paymentConfig.nagad_enabled && (
+              <div className="space-y-3 pt-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">Nagad Number</Label>
+                  <Input value={paymentConfig.nagad_number} onChange={(e) => setPaymentConfig(prev => ({ ...prev, nagad_number: e.target.value }))} placeholder="01XXXXXXXXX" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Payment Instructions</Label>
+                  <Textarea value={paymentConfig.nagad_instructions} onChange={(e) => setPaymentConfig(prev => ({ ...prev, nagad_instructions: e.target.value }))} placeholder="e.g. Send payment to 01XXXXXXXXX and include your order number as reference" rows={3} />
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* COD */}
           <div className="space-y-3 p-4 border border-border rounded-lg">
             <div className="flex items-center justify-between">
