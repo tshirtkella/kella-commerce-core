@@ -2,7 +2,7 @@ import { Navigate, Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Package, LayoutGrid, LogOut, Shirt, ShoppingCart,
-  Users, Settings, BarChart3, Megaphone, ChevronRight, Bell,
+  Users, Settings, BarChart3, Megaphone, ChevronRight, Bell, Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -15,6 +15,7 @@ const navItems = [
   { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
   { to: "/admin/customers", icon: Users, label: "Customers" },
   { to: "/admin/offers", icon: Megaphone, label: "Offers" },
+  { to: "/admin/promo-codes", icon: Tag, label: "Promo Codes" },
   { to: "/admin/settings", icon: Settings, label: "Settings" },
 ];
 

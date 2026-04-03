@@ -12,7 +12,8 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ArrowLeft, Trash2, HelpCircle } from "lucide-react";
+import { Loader2, ArrowLeft, Trash2, HelpCircle, Tag } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import StoreHeader from "@/components/storefront/StoreHeader";
 import StoreFooter from "@/components/storefront/StoreFooter";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -39,6 +40,9 @@ const Checkout = () => {
   const [billingOption, setBillingOption] = useState<BillingOption>("same");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [discountCode, setDiscountCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount_type: string; discount_value: number; id: string } | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState("");
   const [emailOffers, setEmailOffers] = useState(true);
   const [saveInfo, setSaveInfo] = useState(false);
   const [textOffers, setTextOffers] = useState(false);
@@ -105,8 +109,46 @@ const Checkout = () => {
   });
 
   const shippingCost = SHIPPING_ZONES.find((z) => z.value === shippingZone)?.price ?? 60;
-  const tax = Math.round(totalPrice * 0.075 * 100) / 100;
-  const grandTotal = totalPrice + shippingCost + tax;
+  const promoDiscount = appliedPromo
+    ? appliedPromo.discount_type === "percentage"
+      ? Math.round(totalPrice * (appliedPromo.discount_value / 100) * 100) / 100
+      : Math.min(appliedPromo.discount_value, totalPrice)
+    : 0;
+  const discountedSubtotal = totalPrice - promoDiscount;
+  const tax = Math.round(discountedSubtotal * 0.075 * 100) / 100;
+  const grandTotal = discountedSubtotal + shippingCost + tax;
+
+  const handleApplyPromo = async () => {
+    const code = discountCode.trim().toUpperCase();
+    if (!code) return;
+    setPromoLoading(true);
+    setPromoError("");
+    try {
+      const { data, error } = await supabase
+        .from("promo_codes")
+        .select("*")
+        .eq("code", code)
+        .eq("is_active", true)
+        .single();
+      if (error || !data) { setPromoError("Invalid promo code"); return; }
+      if (data.ends_at && new Date(data.ends_at) < new Date()) { setPromoError("This code has expired"); return; }
+      if (data.starts_at && new Date(data.starts_at) > new Date()) { setPromoError("This code is not yet active"); return; }
+      if (data.max_uses && data.used_count >= data.max_uses) { setPromoError("This code has reached its usage limit"); return; }
+      if (totalPrice < data.min_order_amount) { setPromoError(`Minimum order amount is ৳${data.min_order_amount}`); return; }
+      setAppliedPromo({ code: data.code, discount_type: data.discount_type, discount_value: Number(data.discount_value), id: data.id });
+      toast({ title: "Promo code applied!", description: `${data.discount_type === "percentage" ? data.discount_value + "%" : "৳" + data.discount_value} discount` });
+    } catch {
+      setPromoError("Failed to validate code");
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const removePromo = () => {
+    setAppliedPromo(null);
+    setDiscountCode("");
+    setPromoError("");
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -159,12 +201,12 @@ const Checkout = () => {
         .insert({
           order_number: orderNumber,
           customer_id: customer.id,
-          subtotal: totalPrice,
+          subtotal: discountedSubtotal,
           shipping_cost: shippingCost,
           tax,
           total: grandTotal,
           shipping_address: shippingAddress,
-          notes: `Shipping: ${shippingZone} | Payment: ${paymentMethod}`,
+          notes: `Shipping: ${shippingZone} | Payment: ${paymentMethod}${appliedPromo ? ` | Promo: ${appliedPromo.code} (-${appliedPromo.discount_type === "percentage" ? appliedPromo.discount_value + "%" : "৳" + appliedPromo.discount_value})` : ""}`,
           status: paymentMethod === "cod" ? "confirmed" : "pending",
         })
         .select("id")
@@ -184,6 +226,11 @@ const Checkout = () => {
 
       const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
       if (itemsErr) throw itemsErr;
+
+      // Increment promo code used_count via secure function
+      if (appliedPromo) {
+        await supabase.rpc("increment_promo_usage", { _promo_id: appliedPromo.id });
+      }
 
       if (paymentMethod === "sslcommerz") {
         toast({ title: "Online payment coming soon!", description: "Your order has been placed as COD for now." });
@@ -473,17 +520,35 @@ const Checkout = () => {
               </div>
 
               {/* Discount */}
-              <div className="flex gap-2 pt-2">
-                <Input
-                  value={discountCode}
-                  onChange={(e) => setDiscountCode(e.target.value)}
-                  placeholder="Discount code or gift card"
-                  className="flex-1"
-                />
-                <Button variant="outline" onClick={() => toast({ title: "Discount codes coming soon!" })}>
-                  Apply
-                </Button>
-              </div>
+              {appliedPromo ? (
+                <div className="flex items-center justify-between bg-success/10 rounded-lg px-3 py-2 pt-2">
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-success" />
+                    <span className="text-sm font-mono font-bold text-success">{appliedPromo.code}</span>
+                    <Badge variant="secondary" className="text-[10px] bg-success/20 text-success border-0">
+                      {appliedPromo.discount_type === "percentage" ? `${appliedPromo.discount_value}% off` : `৳${appliedPromo.discount_value} off`}
+                    </Badge>
+                  </div>
+                  <button onClick={removePromo} className="text-muted-foreground hover:text-destructive transition">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <div className="pt-2 space-y-1">
+                  <div className="flex gap-2">
+                    <Input
+                      value={discountCode}
+                      onChange={(e) => { setDiscountCode(e.target.value); setPromoError(""); }}
+                      placeholder="Discount code or gift card"
+                      className={`flex-1 uppercase font-mono ${promoError ? "border-destructive" : ""}`}
+                    />
+                    <Button variant="outline" onClick={handleApplyPromo} disabled={promoLoading}>
+                      {promoLoading ? "..." : "Apply"}
+                    </Button>
+                  </div>
+                  {promoError && <p className="text-xs text-destructive">{promoError}</p>}
+                </div>
+              )}
 
               <Separator />
 
@@ -493,6 +558,12 @@ const Checkout = () => {
                   <span className="text-muted-foreground">Subtotal</span>
                   <span>{format(totalPrice)}</span>
                 </div>
+                {promoDiscount > 0 && (
+                  <div className="flex justify-between text-success">
+                    <span>Discount ({appliedPromo?.code})</span>
+                    <span>-{format(promoDiscount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground flex items-center gap-1">
                     Shipping
