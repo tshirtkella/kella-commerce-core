@@ -39,6 +39,9 @@ const Checkout = () => {
   const [billingOption, setBillingOption] = useState<BillingOption>("same");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [discountCode, setDiscountCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount_type: string; discount_value: number; id: string } | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState("");
   const [emailOffers, setEmailOffers] = useState(true);
   const [saveInfo, setSaveInfo] = useState(false);
   const [textOffers, setTextOffers] = useState(false);
