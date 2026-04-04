@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowLeft, Trash2, HelpCircle, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import StoreHeader from "@/components/storefront/StoreHeader";
+import CheckoutChatWidget from "@/components/storefront/CheckoutChatWidget";
 import StoreFooter from "@/components/storefront/StoreFooter";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
