@@ -49,6 +49,69 @@ const Checkout = () => {
   const [attempted, setAttempted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // Draft order tracking
+  const sessionIdRef = useRef<string>(() => {
+    const existing = sessionStorage.getItem("checkout_session_id");
+    if (existing) return existing;
+    const id = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem("checkout_session_id", id);
+    return id;
+  });
+  const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const saveDraft = useCallback(async (formData: typeof form, pm: string) => {
+    const sessionId = typeof sessionIdRef.current === "function" 
+      ? (sessionIdRef.current as () => string)() 
+      : sessionIdRef.current;
+    // Only save if at least one field has data
+    const hasData = Object.values(formData).some((v) => v?.trim());
+    if (!hasData) return;
+
+    try {
+      await supabase.from("draft_orders").upsert(
+        {
+          session_id: sessionId,
+          first_name: formData.firstName || null,
+          last_name: formData.lastName || null,
+          email: formData.email || null,
+          phone: formData.phone || null,
+          address_line1: formData.address || null,
+          city: formData.city || null,
+          zip: formData.zip || null,
+          country: formData.country || null,
+          payment_method: pm || null,
+          cart_items: items.map((i) => ({ name: i.name, color: i.color, size: i.size, quantity: i.quantity, price: i.price })),
+          total: totalPrice,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "session_id" }
+      );
+    } catch (e) {
+      // Silent fail for draft saving
+    }
+  }, [items, totalPrice]);
+
+  const debouncedSaveDraft = useCallback((formData: typeof form, pm: string) => {
+    if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+    draftTimerRef.current = setTimeout(() => saveDraft(formData, pm), 1500);
+  }, [saveDraft]);
+
+  // Save draft on form changes
+  useEffect(() => {
+    debouncedSaveDraft(form, paymentMethod);
+  }, [form, paymentMethod, debouncedSaveDraft]);
+
+  // Delete draft on successful order
+  const deleteDraft = async () => {
+    const sessionId = typeof sessionIdRef.current === "function"
+      ? (sessionIdRef.current as () => string)()
+      : sessionIdRef.current;
+    try {
+      await supabase.from("draft_orders").delete().eq("session_id", sessionId);
+      sessionStorage.removeItem("checkout_session_id");
+    } catch {}
+  };
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex = /^[\d+\-() ]{7,15}$/;
 
