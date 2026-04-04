@@ -22,6 +22,7 @@ import Customers from "./pages/admin/Customers";
 import Settings from "./pages/admin/Settings";
 import Offers from "./pages/admin/Offers";
 import PromoCodes from "./pages/admin/PromoCodes";
+import AbandonedCheckouts from "./pages/admin/AbandonedCheckouts";
 import Profile from "./pages/Profile";
 import MyOrders from "./pages/MyOrders";
 import ShippingAddress from "./pages/ShippingAddress";
