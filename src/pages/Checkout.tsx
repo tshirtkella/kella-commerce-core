@@ -50,7 +50,7 @@ const Checkout = () => {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Draft order tracking
-  const sessionIdRef = useRef<string>(() => {
+  const [sessionId] = useState<string>(() => {
     const existing = sessionStorage.getItem("checkout_session_id");
     if (existing) return existing;
     const id = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
