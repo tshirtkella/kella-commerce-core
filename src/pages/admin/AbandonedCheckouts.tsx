@@ -8,12 +8,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/hooks/useCurrency";
 import { formatDistanceToNow } from "date-fns";
+import AbandonedChatDrawer from "@/components/admin/AbandonedChatDrawer";
 
 const AbandonedCheckouts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { format } = useCurrency();
   const [selectedDraft, setSelectedDraft] = useState<any>(null);
+  const [chatDraft, setChatDraft] = useState<any>(null);
 
   const { data: drafts, isLoading } = useQuery({
     queryKey: ["draft-orders"],
