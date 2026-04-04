@@ -59,10 +59,9 @@ const Checkout = () => {
   });
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const saveDraft = useCallback(async (formData: Record<string, string>, pm: string) => {
+  const saveDraftFn = useCallback(async (formData: Record<string, string>, pm: string) => {
     const hasData = Object.values(formData).some((v) => v?.trim());
     if (!hasData) return;
-
     try {
       await supabase.from("draft_orders").upsert(
         {
@@ -82,28 +81,10 @@ const Checkout = () => {
         },
         { onConflict: "session_id" }
       );
-    } catch (e) {
-      // Silent fail for draft saving
+    } catch {
+      // Silent fail
     }
   }, [items, totalPrice, sessionId]);
-
-  const debouncedSaveDraft = useCallback((formData: Record<string, string>, pm: string) => {
-    if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
-    draftTimerRef.current = setTimeout(() => saveDraft(formData, pm), 1500);
-  }, [saveDraft]);
-
-  // Save draft on form changes
-  useEffect(() => {
-    debouncedSaveDraft(form, paymentMethod);
-  }, [form, paymentMethod, debouncedSaveDraft]);
-
-  // Delete draft on successful order
-  const deleteDraft = async () => {
-    try {
-      await supabase.from("draft_orders").delete().eq("session_id", sessionId);
-      sessionStorage.removeItem("checkout_session_id");
-    } catch {}
-  };
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex = /^[\d+\-() ]{7,15}$/;
