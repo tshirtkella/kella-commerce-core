@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, Trash2, Eye, Clock, User, Phone, Mail, MapPin, ShoppingBag } from "lucide-react";
+import { AlertTriangle, Trash2, Eye, Clock, User, Phone, Mail, MapPin, ShoppingBag, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/hooks/useCurrency";
 import { formatDistanceToNow } from "date-fns";
+import AbandonedChatDrawer from "@/components/admin/AbandonedChatDrawer";
 
 const AbandonedCheckouts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { format } = useCurrency();
   const [selectedDraft, setSelectedDraft] = useState<any>(null);
+  const [chatDraft, setChatDraft] = useState<any>(null);
 
   const { data: drafts, isLoading } = useQuery({
     queryKey: ["draft-orders"],
@@ -173,6 +175,9 @@ const AbandonedCheckouts = () => {
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedDraft(draft)}>
                           <Eye className="h-4 w-4" />
                         </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={() => setChatDraft(draft)}>
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(draft.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -285,6 +290,9 @@ const AbandonedCheckouts = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Chat Drawer */}
+      <AbandonedChatDrawer draft={chatDraft} open={!!chatDraft} onOpenChange={(open) => !open && setChatDraft(null)} />
     </div>
   );
 };
