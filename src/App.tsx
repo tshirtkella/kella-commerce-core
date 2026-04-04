@@ -22,6 +22,7 @@ import Customers from "./pages/admin/Customers";
 import Settings from "./pages/admin/Settings";
 import Offers from "./pages/admin/Offers";
 import PromoCodes from "./pages/admin/PromoCodes";
+import AbandonedCheckouts from "./pages/admin/AbandonedCheckouts";
 import Profile from "./pages/Profile";
 import MyOrders from "./pages/MyOrders";
 import ShippingAddress from "./pages/ShippingAddress";
@@ -63,6 +64,7 @@ const App = () => (
                 <Route path="customers" element={<Customers />} />
                 <Route path="offers" element={<Offers />} />
                 <Route path="promo-codes" element={<PromoCodes />} />
+                <Route path="abandoned" element={<AbandonedCheckouts />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
               <Route path="*" element={<NotFound />} />

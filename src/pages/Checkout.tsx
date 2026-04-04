@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -48,6 +48,43 @@ const Checkout = () => {
   const [textOffers, setTextOffers] = useState(false);
   const [attempted, setAttempted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // Draft order tracking
+  const [sessionId] = useState<string>(() => {
+    const existing = sessionStorage.getItem("checkout_session_id");
+    if (existing) return existing;
+    const id = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem("checkout_session_id", id);
+    return id;
+  });
+  const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const saveDraftFn = useCallback(async (formData: Record<string, string>, pm: string) => {
+    const hasData = Object.values(formData).some((v) => v?.trim());
+    if (!hasData) return;
+    try {
+      await supabase.from("draft_orders").upsert(
+        {
+          session_id: sessionId,
+          first_name: formData.firstName || null,
+          last_name: formData.lastName || null,
+          email: formData.email || null,
+          phone: formData.phone || null,
+          address_line1: formData.address || null,
+          city: formData.city || null,
+          zip: formData.zip || null,
+          country: formData.country || null,
+          payment_method: pm || null,
+          cart_items: items.map((i) => ({ name: i.name, color: i.color, size: i.size, quantity: i.quantity, price: i.price })),
+          total: totalPrice,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "session_id" }
+      );
+    } catch {
+      // Silent fail
+    }
+  }, [items, totalPrice, sessionId]);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex = /^[\d+\-() ]{7,15}$/;
@@ -110,6 +147,23 @@ const Checkout = () => {
     phone: "",
     country: "Bangladesh",
   });
+
+  // Debounced draft saving
+  const debouncedSaveDraft = useCallback((formData: Record<string, string>, pm: string) => {
+    if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+    draftTimerRef.current = setTimeout(() => saveDraftFn(formData, pm), 1500);
+  }, [saveDraftFn]);
+
+  useEffect(() => {
+    debouncedSaveDraft(form, paymentMethod);
+  }, [form, paymentMethod, debouncedSaveDraft]);
+
+  const deleteDraft = async () => {
+    try {
+      await supabase.from("draft_orders").delete().eq("session_id", sessionId);
+      sessionStorage.removeItem("checkout_session_id");
+    } catch {}
+  };
 
   const shippingCost = SHIPPING_ZONES.find((z) => z.value === shippingZone)?.price ?? 60;
   const promoDiscount = appliedPromo
@@ -243,6 +297,7 @@ const Checkout = () => {
         toast({ title: "Nagad payment coming soon!", description: "Your order has been placed as COD for now." });
       }
 
+      await deleteDraft();
       clearCart();
       toast({ title: "Order placed!", description: `Order #${orderNumber} confirmed.` });
       navigate("/");
