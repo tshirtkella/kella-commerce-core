@@ -290,6 +290,9 @@ const AbandonedCheckouts = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Chat Drawer */}
+      <AbandonedChatDrawer draft={chatDraft} open={!!chatDraft} onOpenChange={(open) => !open && setChatDraft(null)} />
     </div>
   );
 };
