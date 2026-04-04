@@ -704,6 +704,7 @@ const Checkout = () => {
       </main>
 
       <StoreFooter />
+      <CheckoutChatWidget sessionId={sessionId} />
     </div>
   );
 };
