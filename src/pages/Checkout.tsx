@@ -148,6 +148,23 @@ const Checkout = () => {
     country: "Bangladesh",
   });
 
+  // Debounced draft saving
+  const debouncedSaveDraft = useCallback((formData: Record<string, string>, pm: string) => {
+    if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+    draftTimerRef.current = setTimeout(() => saveDraftFn(formData, pm), 1500);
+  }, [saveDraftFn]);
+
+  useEffect(() => {
+    debouncedSaveDraft(form, paymentMethod);
+  }, [form, paymentMethod, debouncedSaveDraft]);
+
+  const deleteDraft = async () => {
+    try {
+      await supabase.from("draft_orders").delete().eq("session_id", sessionId);
+      sessionStorage.removeItem("checkout_session_id");
+    } catch {}
+  };
+
   const shippingCost = SHIPPING_ZONES.find((z) => z.value === shippingZone)?.price ?? 60;
   const promoDiscount = appliedPromo
     ? appliedPromo.discount_type === "percentage"
