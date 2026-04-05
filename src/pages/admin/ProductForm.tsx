@@ -28,6 +28,7 @@ const ProductForm = () => {
   const [description, setDescription] = useState("");
   const [basePrice, setBasePrice] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [discountPercentage, setDiscountPercentage] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [variants, setVariants] = useState<VariantInput[]>([
