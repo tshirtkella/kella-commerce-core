@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Star, CheckCircle2, ImagePlus, Loader2, ChevronDown } from "lucide-react";
+import { Star, CheckCircle2, Loader2, ChevronDown, MessageSquare, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Props {
