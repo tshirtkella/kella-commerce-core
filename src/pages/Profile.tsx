@@ -273,6 +273,16 @@ const Profile = () => {
           </div>
         </div>
 
+        {/* My Reviews */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
+              <Star className="h-4 w-4" /> My Reviews
+            </h2>
+          </div>
+          <MyReviews userId={user.id} />
+        </div>
+
         {/* Logout */}
         <Button
           variant="destructive"
