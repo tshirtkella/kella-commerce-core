@@ -189,32 +189,85 @@ const ProductReviews = ({ productId, productName }: Props) => {
         <p className="text-sm text-muted-foreground py-6 text-center">No reviews yet. Be the first!</p>
       ) : (
         <div className="space-y-5">
-          {visible.map((r) => (
-            <div key={r.id} className="border-b border-border pb-5">
-              <div className="flex items-center justify-between mb-1">
-                <StarRating rating={r.rating} size={16} />
-                <span className="text-xs text-muted-foreground">
-                  {new Date(r.created_at).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs text-muted-foreground">{r.reviewer_name}</span>
-                {r.is_verified_purchase && (
-                  <span className="flex items-center gap-0.5 text-xs text-emerald-600">
-                    <CheckCircle2 className="h-3 w-3" /> Verified Purchase
+          {visible.map((r) => {
+            const reviewReplies = repliesData.filter((rep) => rep.review_id === r.id);
+            return (
+              <div key={r.id} className="border-b border-border pb-5">
+                <div className="flex items-center justify-between mb-1">
+                  <StarRating rating={r.rating} size={16} />
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(r.created_at).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}
                   </span>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs text-muted-foreground">{r.reviewer_name}</span>
+                  {r.is_verified_purchase && (
+                    <span className="flex items-center gap-0.5 text-xs text-emerald-600">
+                      <CheckCircle2 className="h-3 w-3" /> Verified Purchase
+                    </span>
+                  )}
+                </div>
+                {r.comment && <p className="text-sm text-foreground leading-relaxed">{r.comment}</p>}
+                {r.images && (r.images as string[]).length > 0 && (
+                  <div className="flex gap-2 mt-2">
+                    {(r.images as string[]).map((img, i) => (
+                      <img key={i} src={img} alt="" className="w-16 h-16 rounded object-cover border border-border" />
+                    ))}
+                  </div>
+                )}
+
+                {/* Replies */}
+                {reviewReplies.length > 0 && (
+                  <div className="mt-3 space-y-2 pl-3 border-l-2 border-primary/20">
+                    {reviewReplies.map((rep) => (
+                      <div key={rep.id} className="bg-muted/30 rounded-lg p-2.5">
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-xs font-medium text-foreground">{rep.reviewer_name}</span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(rep.created_at).toLocaleDateString("en-US", { day: "2-digit", month: "short" })}
+                          </span>
+                        </div>
+                        <p className="text-xs text-foreground/80">{rep.reply_text}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Reply button & form */}
+                {replyingTo === r.id ? (
+                  <div className="flex gap-2 mt-3">
+                    <Input
+                      placeholder="Write a reply..."
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      className="text-sm h-8"
+                    />
+                    <Button
+                      size="sm"
+                      className="h-8 px-3"
+                      disabled={!replyText.trim() || replyMutation.isPending}
+                      onClick={() => replyMutation.mutate()}
+                    >
+                      {replyMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-8" onClick={() => { setReplyingTo(null); setReplyText(""); }}>
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (!user) { toast({ title: "Please log in to reply", variant: "destructive" }); return; }
+                      setReplyingTo(r.id);
+                    }}
+                    className="flex items-center gap-1 mt-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <MessageSquare className="h-3 w-3" /> Reply
+                  </button>
                 )}
               </div>
-              {r.comment && <p className="text-sm text-foreground leading-relaxed">{r.comment}</p>}
-              {r.images && (r.images as string[]).length > 0 && (
-                <div className="flex gap-2 mt-2">
-                  {(r.images as string[]).map((img, i) => (
-                    <img key={i} src={img} alt="" className="w-16 h-16 rounded object-cover border border-border" />
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
