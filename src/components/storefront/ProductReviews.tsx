@@ -86,6 +86,43 @@ const ProductReviews = ({ productId, productName }: Props) => {
     onError: () => toast({ title: "Failed to submit review", variant: "destructive" }),
   });
 
+  // Fetch all replies for visible reviews
+  const { data: repliesData = [] } = useQuery({
+    queryKey: ["review-replies", productId],
+    queryFn: async () => {
+      const ids = reviews.map((r) => r.id);
+      if (ids.length === 0) return [];
+      const { data, error } = await supabase
+        .from("review_replies")
+        .select("*")
+        .in("review_id", ids)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: reviews.length > 0,
+  });
+
+  const replyMutation = useMutation({
+    mutationFn: async () => {
+      if (!user || !replyingTo) return;
+      const { error } = await supabase.from("review_replies").insert({
+        review_id: replyingTo,
+        user_id: user.id,
+        reply_text: replyText.trim(),
+        reviewer_name: user.email?.split("@")[0] ?? "User",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["review-replies", productId] });
+      toast({ title: "Reply posted!" });
+      setReplyingTo(null);
+      setReplyText("");
+    },
+    onError: () => toast({ title: "Failed to post reply", variant: "destructive" }),
+  });
+
   // Stats
   const total = reviews.length;
   const avg = total > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / total : 0;
